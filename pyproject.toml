@@ -1,0 +1,17 @@
+[project]
+name = "hf-sensor-ml"
+version = "0.1.0"
+description = "Workflow scaffold for high-frequency sensor data modeling"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Ghanshyambabariya", email = "Ghanshyambabariya1111@gmail.com" }
+]
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -11,13 +11,30 @@ Thumbs.db
 .env
 .env.*
 
-# Dependencies
-node_modules/
-
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data artifacts
+*.parquet
+*.feather
+*.h5
 
 # Build output
-dist/
 build/
+dist/
+*.egg-info/
+
+# ML artifacts
+models/*.pt
+models/*.pth
+models/*.pkl
+models/*.joblib
+reports/figures/*.png
+reports/figures/*.jpg
