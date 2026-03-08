@@ -41,7 +41,7 @@ def train_baseline_models(features: pd.DataFrame, *, label_column: str, random_s
         "logistic_regression": Pipeline(
             steps=[
                 ("preprocessor", preprocessor),
-                ("model", LogisticRegression(max_iter=4000, multi_class="auto")),
+                ("model", LogisticRegression(max_iter=4000)),
             ]
         ),
         "random_forest": Pipeline(
@@ -81,3 +81,4 @@ def train_baseline_models(features: pd.DataFrame, *, label_column: str, random_s
             ]
 
     return results
+

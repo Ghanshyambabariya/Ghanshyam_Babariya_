@@ -1,6 +1,9 @@
 {
   "raw_data_path": "data/raw/grinding_20khz.csv",
   "sample_rate_hz": 20000,
+  "duration_seconds": 20,
+  "sample_seed": 42,
+  "generate_sample_if_missing": true,
   "timestamp_column": "time_s",
   "sensor_columns": ["Fx", "Fy", "Fz", "Mz"],
   "label_column": "stage",

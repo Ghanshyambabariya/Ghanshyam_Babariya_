@@ -38,3 +38,10 @@ models/*.pkl
 models/*.joblib
 reports/figures/*.png
 reports/figures/*.jpg
+
+# Keep generated demo artifacts visible in GitHub
+!data/raw/grinding_20khz.csv
+!data/processed/grinding_window_features.csv
+!reports/real_run_results.json
+!reports/figures/raw_signal_preview.png
+!reports/figures/top_features.png

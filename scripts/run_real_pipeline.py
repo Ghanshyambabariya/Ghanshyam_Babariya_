@@ -16,6 +16,7 @@ from hf_sensor_ml.pipelines.analysis import save_signal_preview, summarize_raw_d
 from hf_sensor_ml.pipelines.classical_ml import train_baseline_models
 from hf_sensor_ml.pipelines.feature_engineering import build_feature_dataset
 from hf_sensor_ml.pipelines.sequence_models import train_sequence_models
+from hf_sensor_ml.utils.simulated_data import generate_grinding_sample
 
 
 def save_top_feature_plot(results: dict, output_path: Path) -> None:
@@ -32,17 +33,31 @@ def save_top_feature_plot(results: dict, output_path: Path) -> None:
     plt.close(fig)
 
 
+def load_or_create_input(repo_root: Path, config: dict) -> tuple[pd.DataFrame, Path, str]:
+    raw_data_path = repo_root / config["raw_data_path"]
+    raw_data_path.parent.mkdir(parents=True, exist_ok=True)
+    if raw_data_path.exists():
+        return pd.read_csv(raw_data_path), raw_data_path, "existing"
+
+    if not config.get("generate_sample_if_missing", False):
+        raise FileNotFoundError(
+            f"Input file not found: {raw_data_path}. Put your grinding CSV there first."
+        )
+
+    df = generate_grinding_sample(
+        sample_rate_hz=config["sample_rate_hz"],
+        duration_seconds=config.get("duration_seconds", 20),
+        seed=config.get("sample_seed", 42),
+    )
+    df.to_csv(raw_data_path, index=False)
+    return df, raw_data_path, "generated"
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     config = json.loads((repo_root / "configs" / "grinding_20khz.json").read_text(encoding="utf-8"))
 
-    raw_data_path = repo_root / config["raw_data_path"]
-    if not raw_data_path.exists():
-        raise FileNotFoundError(
-            f"Real input file not found: {raw_data_path}. Put your 20 kHz grinding CSV there first."
-        )
-
-    df = pd.read_csv(raw_data_path)
+    df, raw_data_path, input_mode = load_or_create_input(repo_root, config)
     validate_input_frame(df, config["sensor_columns"], config["timestamp_column"])
 
     analysis_summary = summarize_raw_data(
@@ -72,6 +87,7 @@ def main() -> None:
         stride_seconds=config["feature_stride_seconds"],
     )
     feature_data_path = repo_root / "data" / "processed" / "grinding_window_features.csv"
+    feature_data_path.parent.mkdir(parents=True, exist_ok=True)
     feature_df.to_csv(feature_data_path, index=False)
 
     label_column = config.get("label_column")
@@ -96,6 +112,7 @@ def main() -> None:
     )
 
     results = {
+        "input_mode": input_mode,
         "analysis": analysis_summary,
         "feature_engineering": {
             "num_feature_windows": int(len(feature_df)),
@@ -118,4 +135,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

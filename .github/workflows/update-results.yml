@@ -1,0 +1,38 @@
+name: Update Pipeline Results
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'configs/**'
+      - 'data/raw/**'
+      - 'scripts/**'
+      - 'src/**'
+      - '.github/workflows/update-results.yml'
+  workflow_dispatch:
+
+jobs:
+  refresh-results:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas scikit-learn matplotlib torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run pipeline
+        run: python scripts/run_real_pipeline.py
+      - name: Commit generated artifacts
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/raw/grinding_20khz.csv data/processed/grinding_window_features.csv reports/real_run_results.json reports/figures/raw_signal_preview.png reports/figures/top_features.png
+          git diff --cached --quiet && exit 0
+          git commit -m "Update generated pipeline outputs"
+          git push
